@@ -60,8 +60,21 @@ why. Three consequences:
 
 Cases are ordered so that the checks needing an empty tree run before anything is cosigned.
 
+## Checking the suite itself
+
+Every PASS depends on this suite's own RFC 6962 being right, so `selftest.py` checks it
+against a different implementation in a different language: the roots and consistency proofs
+in `rfc6962_kat.json` come from `github.com/transparency-dev/merkle`. The Ed25519 vector is
+RFC 8032 section 7.1, test 1.
+
+```
+python3 selftest.py
+10 checks, 0 failures
+```
+
 ## Files
 
 - `gauntlet.py` — the suite.
+- `selftest.py`, `rfc6962_kat.json` — the check on the suite's own crypto.
 - `ed25519.py` — a from-scratch RFC 8032 implementation, so a run does not lean on the same
   crypto library the witness under test uses.
