@@ -37,6 +37,7 @@ below the witness's current size.
 |---|---|---|
 | `transparency-dev/witness` @55a5a0b (the reference) | 0 | 1 — accepts a non-canonical base64 root |
 | `cryptovalid-opencore` 0.14.0 | 0 | 0 |
+| `FiloSottile/torchwood` litewitness @1cadf59 | 0 | 1 — non-canonical base64 root returns 500 |
 | `markovianprotocol.com/witness` | 0 | 0 |
 
 The Markovian witness scored two spec failures the first time this suite was pointed at it,
