@@ -23,6 +23,15 @@ Each case names the rule it checks and where the rule comes from:
   accepts the input. A failure is reported as `MISS` and never fails the run; it is a choice
   for the operator, not a bug.
 
+One case has changed tier. The non-canonical base64 root started as **strict**, because the
+spec said "base64" and left decoder leniency to RFC 4648 §3.5. We asked C2SP which reading
+was intended ([C2SP #348](https://github.com/C2SP/C2SP/issues/348), 21 Sept 2026). On 1 Oct
+Filippo Valsorda merged [C2SP #370](https://github.com/C2SP/C2SP/pull/370), "Fixes #348":
+encoders MUST generate canonical base64 and decoders MUST reject non-canonical encodings,
+in signed-note, tlog-checkpoint, tlog-witness, tlog-mirror and tlog-proof. The case is
+**spec** from this commit on. The published tag `tlog-checkpoint@v1.0.0` predates the
+sentence; the rule is in the spec at `main`.
+
 ## What it checks
 
 Trust on first use; growth with and without a consistency proof; a garbage proof; a stale
@@ -35,10 +44,15 @@ below the witness's current size.
 
 | witness | spec failures | strict misses |
 |---|---|---|
-| `transparency-dev/witness` @55a5a0b (the reference) | 0 | 1 — accepts a non-canonical base64 root |
+| `transparency-dev/witness` @55a5a0b (the reference) | 1 — cosigns a non-canonical base64 root (strict until 2026-10-01, spec since) | 0 |
 | `cryptovalid-opencore` 0.14.0 | 0 | 0 |
-| `FiloSottile/torchwood` litewitness @1cadf59 | 0 | 1 — non-canonical base64 root returns 500 |
+| `FiloSottile/torchwood` litewitness @1cadf59 | 0 | 0 — refuses the non-canonical root, with a 500 rather than a 4xx |
 | `markovianprotocol.com/witness` | 0 | 0 |
+
+The reference-witness row is the 21 Sept measurement re-read under the new rule, not a new
+run: it cosigns what a decoder must now refuse. litewitness does refuse it; the 500 is a
+status-code quibble, and the suite will print it as a FAIL because it wants a 4xx. The
+Markovian row was re-run on 2026-10-07 against the build that enforces the new rule.
 
 The Markovian witness scored two spec failures the first time this suite was pointed at it,
 both now fixed: it cosigned a size-0 checkpoint carrying a fabricated root, and it recorded a

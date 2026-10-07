@@ -18,6 +18,11 @@ Each case states the rule it checks and where the rule comes from:
          the input. A FAIL is a choice, not a defect - it is reported as STRICT-MISS so the
          operator can decide.
 
+The non-canonical base64 case moved from strict to spec on 2026-10-01, when C2SP #370
+(fixing this suite's question, C2SP #348) made the rule normative: "decoders MUST reject
+non-canonical encodings". The published tag c2sp.org/tlog-checkpoint@v1.0.0 predates that
+sentence; the rule is in the spec at main.
+
 Exit code is 1 if any spec case fails, 0 otherwise. STRICT-MISS never fails the run.
 """
 import argparse
@@ -185,13 +190,14 @@ class Suite:
         c("more than 63 proof lines", "spec",
           "tlog-witness: a client MUST NOT send more than 63 proof lines",
           (400, 422), 25, self.cp(40), [base64.b64encode(bytes(32)).decode() for _ in range(64)])
-        # strict tier: the Go reference witness accepts both of these.
+        # spec since 2026-10-01 (C2SP #370): decoders MUST reject non-canonical base64. The
+        # Go reference witness @55a5a0b accepts it, which is now a defect rather than a choice.
         alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
         rb = base64.b64encode(self.root(25)).decode()
         noncanon = rb[:-2] + alph[(alph.index(rb[-2]) + 1) % 64] + "="
         assert base64.b64decode(noncanon) == self.root(25)
-        c("non-canonical base64 root", "strict",
-          "same bytes, different text: two checkpoints for one tree state",
+        c("non-canonical base64 root", "spec",
+          "tlog-checkpoint (C2SP #370, 2026-10-01): decoders MUST reject non-canonical base64",
           (400, 422), 25, self.cp(25, root_b64=noncanon))
         # This case cannot isolate a length check over this interface: the witness already
         # holds a root at size 25, so a refusal may be the ordinary mismatch rather than a
